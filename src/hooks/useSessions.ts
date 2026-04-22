@@ -131,6 +131,7 @@ export function useSessions() {
     setMessages(session.messages);
     setTokenUsage({ prompt: 0, response: 0, total: 0 });
     localStorage.setItem(ACTIVE_SESSION_KEY, session.id);
+    window.alert('New analysis session created.');
   }, [persist]);
 
   const switchSession = useCallback((id: string) => {
@@ -172,6 +173,7 @@ export function useSessions() {
             return withFresh;
           }
         }
+        window.alert('Session deleted successfully.');
         return updated;
       });
     },

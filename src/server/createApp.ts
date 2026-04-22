@@ -48,7 +48,8 @@ const APP_URL = (
 ).replace(/\/$/, '');
 const IS_PROD = process.env.NODE_ENV === 'production';
 const SESSION_SECRET = process.env.SESSION_SECRET;
-const GEMINI_MODEL_PRO = process.env.GEMINI_MODEL_PRO || 'gemini-1.5-pro-latest';
+// Using Flash as the primary model for speed and larger context window (per user request)
+const GEMINI_MODEL_PRO = process.env.GEMINI_MODEL_PRO || 'gemini-1.5-flash-latest';
 const GEMINI_MODEL_FLASH = process.env.GEMINI_MODEL_FLASH || 'gemini-1.5-flash-latest';
 
 // Fail fast at module load time so errors surface in logs, not mid-request.

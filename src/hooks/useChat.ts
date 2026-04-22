@@ -98,6 +98,7 @@ export function useChat({
             : m,
         ),
       );
+      window.alert('Analysis complete! Check the results below.');
     },
     [setMessages],
   );

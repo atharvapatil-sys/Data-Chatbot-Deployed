@@ -207,6 +207,7 @@ export function useAuth(onSchemaDetected: (schema: string) => void) {
       setIsAuthenticated(false);
       // Reset schema to default after logout to prevent stale data
       onSchemaDetected(ANALYTICS_SCHEMA);
+      window.alert('You have been logged out successfully.');
     }
   }, [onSchemaDetected]);
 
