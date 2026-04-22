@@ -117,9 +117,22 @@ export function useAuth(onSchemaDetected: (schema: string) => void) {
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'insight_stream_auth_update') {
         logger.info('Auth update detected via localStorage pulse');
-        void checkAuthStatus().then((authed) => {
-          if (authed) void detectSchema();
-        });
+
+        // Initial optimistic update to trigger header UI refresh
+        setIsCheckingAuth(true);
+
+        // Slight delay to ensure the browser has persisted the cookie from the popup
+        setTimeout(async () => {
+          const authed = await checkAuthStatus();
+          if (authed) {
+            void detectSchema();
+            // Final fail-safe: if we are authed but UI didn't update, 
+            // a small delay and second schema fetch often helps.
+            setTimeout(() => void detectSchema(), 1000);
+          } else {
+            setIsCheckingAuth(false);
+          }
+        }, 500);
       }
     };
     window.addEventListener('storage', handleStorageChange);
