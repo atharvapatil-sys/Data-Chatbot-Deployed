@@ -111,6 +111,21 @@ export function useAuth(onSchemaDetected: (schema: string) => void) {
     return () => window.removeEventListener('message', handleMessage);
   }, [detectSchema]);
 
+  // ── localStorage Sync Listener ────────────────────────────
+  // Fail-safe for when the opener link is severed on localhost
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'insight_stream_auth_update') {
+        logger.info('Auth update detected via localStorage pulse');
+        void checkAuthStatus().then((authed) => {
+          if (authed) void detectSchema();
+        });
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [checkAuthStatus, detectSchema]);
+
   // ── Login ──────────────────────────────────────────────────
 
   const handleLogin = useCallback(async () => {

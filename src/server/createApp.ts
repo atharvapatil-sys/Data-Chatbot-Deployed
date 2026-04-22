@@ -325,6 +325,7 @@ export function createApp(options: AppOptions = {}): Express {
       secure: IS_PROD && !isLocal,
       sameSite: isLocal ? 'lax' : 'none',
       httpOnly: true,
+      path: '/',
     })(req, _res, next);
   });
 
@@ -508,20 +509,21 @@ export function createApp(options: AppOptions = {}): Express {
               <script>
                 try {
                 var target = ${safeOrigin};
-                console.log('OAuth Success: Targeting origin', target);
-                console.log('Window status: opener is', window.opener ? 'PRESESENT' : 'MISSING');
+                console.log('OAuth Success: Syncing via localStorage and postMessage...');
+                
+                // Signal via localStorage (fail-safe for multi-window sync)
+                localStorage.setItem('insight_stream_auth_update', Date.now().toString());
                 
                 if (window.opener) {
                   window.opener.postMessage({ type: 'OAUTH_AUTH_SUCCESS' }, target);
                   console.log('Message sent to opener.');
-                  setTimeout(function() { window.close(); }, 500);
-                } else {
-                  console.warn('No opener found. Redirecting main window.');
-                  window.location.href = target;
                 }
+                
+                // Small delay to ensure storage/postMessage propagates before closing
+                setTimeout(function() { window.close(); }, 800);
               } catch (e) {
                 console.error('Auth callback error:', e);
-                window.location.href = ${safeOrigin};
+                window.location.href = target;
               }
               </script>
             </div>
