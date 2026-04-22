@@ -107,6 +107,7 @@ export function useAuth(onSchemaDetected: (schema: string) => void) {
       if (event.data?.type !== 'OAUTH_AUTH_SUCCESS') return;
 
       setIsAuthenticated(true);
+      window.alert('Login Successful! Your Google workspace is now connected.');
       // Small delay to let the session cookie propagate before we fetch the schema
       setTimeout(() => void detectSchema(), 800);
     };
@@ -129,6 +130,7 @@ export function useAuth(onSchemaDetected: (schema: string) => void) {
         setTimeout(async () => {
           const authed = await checkAuthStatus();
           if (authed) {
+            window.alert('Login Successful! Authentication sync completed.');
             void detectSchema();
             // Final fail-safe: if we are authed but UI didn't update, 
             // a small delay and second schema fetch often helps.
