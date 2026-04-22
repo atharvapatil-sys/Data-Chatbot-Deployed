@@ -208,8 +208,6 @@ export function useAuth(onSchemaDetected: (schema: string) => void) {
     }
   }, [onSchemaDetected]);
 
-  const [error, setError] = useState<string | null>(null);
-
   return {
     isAuthenticated,
     isCheckingAuth,
