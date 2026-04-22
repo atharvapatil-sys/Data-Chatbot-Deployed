@@ -121,13 +121,33 @@ export function useAuth(onSchemaDetected: (schema: string) => void) {
       );
       if (!res.ok) throw new Error('Failed to get auth URL');
       const { url } = (await res.json()) as { url: string };
-      // noopener prevents the popup from accessing window.opener (security)
-      // but we still need opener for postMessage — omit 'noopener' intentionally
-      window.open(url, 'google_oauth', 'width=600,height=700');
+
+      // Open popup
+      const popup = window.open(url, 'google_oauth', 'width=600,height=700');
+
+      // ── Polling Fallback ──────────────────────────────────
+      // Some browsers/environments (localhost) sever the opener link.
+      // We poll status every second until the popup is closed or we're authed.
+      const pollId = setInterval(async () => {
+        if (!popup || popup.closed) {
+          clearInterval(pollId);
+          // Small final check after window closed
+          setTimeout(() => void checkAuthStatus(), 500);
+          return;
+        }
+
+        const authed = await checkAuthStatus();
+        if (authed) {
+          clearInterval(pollId);
+          popup.close();
+          await detectSchema();
+        }
+      }, 1500);
+
     } catch (err) {
       logger.logAuthError(err);
     }
-  }, []);
+  }, [checkAuthStatus, detectSchema]);
 
   // ── Logout ─────────────────────────────────────────────────
 

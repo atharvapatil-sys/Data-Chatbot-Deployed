@@ -141,6 +141,34 @@ function enforceRowLimit(sql: string, maxRows = 500): string {
   }
   return `${sql.trim()}\nLIMIT ${maxRows}`;
 }
+/**
+ * Scans query results for likely PII based on column names and masks values.
+ * @param rows Array of result objects
+ * @returns Scrubbed array
+ */
+function scrubPII(rows: Record<string, unknown>[]): Record<string, unknown>[] {
+  const SENSITIVE_COLS = /\b(email|password|token|secret|phone|ssn|birth|address)\b/i;
+
+  return rows.map((row) => {
+    const scrubbed = { ...row };
+    for (const key in scrubbed) {
+      if (SENSITIVE_COLS.test(key)) {
+        const val = scrubbed[key];
+        if (typeof val === 'string') {
+          if (val.includes('@')) {
+            const [u, d] = val.split('@');
+            scrubbed[key] = `${u[0]}***@${d}`;
+          } else {
+            scrubbed[key] = '********';
+          }
+        } else {
+          scrubbed[key] = 'MASKED';
+        }
+      }
+    }
+    return scrubbed;
+  });
+}
 
 // ── BigQuery schema cache ────────────────────────────────────
 // Module-level Map: persists across warm Vercel/Cloud Run invocations.
@@ -611,8 +639,9 @@ export function createApp(options: AppOptions = {}): Express {
         if (rows.length === 0) return res.json({ columns: [], rows: [] });
 
         const columns = Object.keys(rows[0] as object);
-        serverLog('INFO', 'query', `Query returned ${rows.length} rows`);
-        return res.json({ columns, rows });
+        const scrubbedRows = scrubPII(rows);
+        serverLog('INFO', 'query', `Query returned ${rows.length} rows (PII scrubbed)`);
+        return res.json({ columns, rows: scrubbedRows });
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : String(err);
         serverLog('ERROR', 'query', 'BigQuery execution error', { msg });
