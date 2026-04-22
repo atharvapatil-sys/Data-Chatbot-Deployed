@@ -246,6 +246,7 @@ export function createApp(options: AppOptions = {}): Express {
   app.use(
     helmet({
       frameguard: false, // allow iframe embedding in AI Studio
+      crossOriginOpenerPolicy: false, // Essential for OAuth popups to communicate back to opener
       contentSecurityPolicy: IS_PROD
         ? {
           directives: {
