@@ -294,7 +294,7 @@ export function createApp(options: AppOptions = {}): Express {
       keys: [SESSION_SECRET || 'dev-secret-key-CHANGE-IN-PRODUCTION'],
       maxAge: 7 * 24 * 60 * 60 * 1000,
       secure: IS_PROD && !isLocal,
-      sameSite: 'none',
+      sameSite: isLocal ? 'lax' : 'none',
       httpOnly: true,
     })(req, _res, next);
   });
@@ -440,7 +440,13 @@ export function createApp(options: AppOptions = {}): Express {
 
     // Verify state nonce to prevent OAuth CSRF
     if (!code || !state || !sessionNonce || state !== sessionNonce) {
-      serverLog('WARN', 'oauth', 'Invalid OAuth state/nonce', { ip: req.ip });
+      serverLog('WARN', 'oauth', 'Invalid OAuth state/nonce', {
+        ip: req.ip,
+        hasCode: !!code,
+        hasState: !!state,
+        hasSession: !!sessionNonce,
+        match: state === sessionNonce
+      });
       return res.status(400).send('Invalid OAuth state. Please try logging in again.');
     }
 
