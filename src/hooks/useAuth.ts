@@ -123,7 +123,7 @@ export function useAuth(onSchemaDetected: (schema: string) => void) {
       const { url } = (await res.json()) as { url: string };
       // noopener prevents the popup from accessing window.opener (security)
       // but we still need opener for postMessage — omit 'noopener' intentionally
-      window.open(url, 'google_oauth', 'width=600,height=700,noreferrer');
+      window.open(url, 'google_oauth', 'width=600,height=700');
     } catch (err) {
       logger.logAuthError(err);
     }
