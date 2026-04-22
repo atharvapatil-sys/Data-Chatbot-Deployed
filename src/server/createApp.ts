@@ -478,15 +478,23 @@ export function createApp(options: AppOptions = {}): Express {
               <h1 style="color:#2563eb;margin-bottom:0.5rem;font-size:1.5rem">Connected</h1>
               <p style="color:#64748b">Syncing your workspace…</p>
               <script>
-                (function() {
-                  var target = ${safeOrigin};
-                  if (window.opener) {
-                    window.opener.postMessage({ type: 'OAUTH_AUTH_SUCCESS' }, target);
-                    setTimeout(function() { window.close(); }, 800);
-                  } else {
-                    window.location.href = '/';
-                  }
-                })();
+                try {
+                var target = ${safeOrigin};
+                console.log('OAuth Success: Targeting origin', target);
+                console.log('Window status: opener is', window.opener ? 'PRESESENT' : 'MISSING');
+                
+                if (window.opener) {
+                  window.opener.postMessage({ type: 'OAUTH_AUTH_SUCCESS' }, target);
+                  console.log('Message sent to opener.');
+                  setTimeout(function() { window.close(); }, 500);
+                } else {
+                  console.warn('No opener found. Redirecting main window.');
+                  window.location.href = target;
+                }
+              } catch (e) {
+                console.error('Auth callback error:', e);
+                window.location.href = ${safeOrigin};
+              }
               </script>
             </div>
           </body>
