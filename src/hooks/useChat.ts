@@ -311,8 +311,16 @@ export function useChat({
       } catch (err: unknown) {
         if (controller.signal.aborted) return;
         const error = err instanceof Error ? err : new Error(String(err));
-        logger.logQueryError(question, error);
-        if (err instanceof ApiError && err.status === 401) onAuthExpired();
+        logger.error('Gemini Stream Error', error);
+
+        // Show as alert if it's a structural/auth failure
+        if (err instanceof ApiError && err.status === 401) {
+          onAuthExpired();
+          window.alert('Your session has expired. Please reconnect your Google account.');
+        } else {
+          window.alert(`System Error: ${error.message}`);
+        }
+
         setMessages((prev) =>
           prev.map((m) =>
             m.id === messageId ? { ...m, content: `Error: ${error.message}`, loading: false } : m,

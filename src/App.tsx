@@ -44,11 +44,29 @@ export default function App() {
   } = useSessions();
 
   // ── Auth ──────────────────────────────────────────────────
-  const { isAuthenticated, isCheckingAuth, setIsAuthenticated, handleLogin, handleLogout } =
-    useAuth(setSchema);
+  const {
+    isAuthenticated,
+    isCheckingAuth,
+    setIsAuthenticated,
+    error,
+    setError,
+    handleLogin,
+    handleLogout
+  } = useAuth(setSchema);
+
+  // Alert user on auth errors
+  useEffect(() => {
+    if (error) {
+      window.alert(error);
+      setError(null);
+    }
+  }, [error, setError]);
 
   // Full logout: clear sessions + CSRF token + reset schema
   const fullLogout = useCallback(async () => {
+    if (!window.confirm('Are you sure you want to log out? This will disconnect your Google account and clear the current workspace.')) {
+      return;
+    }
     await handleLogout();
     clearCsrfToken();
     clearAllSessions();

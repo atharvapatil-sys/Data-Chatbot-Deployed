@@ -16,6 +16,7 @@ import { ANALYTICS_SCHEMA } from '../constants/schema';
 export function useAuth(onSchemaDetected: (schema: string) => void) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // ── Schema detection ───────────────────────────────────────
 
@@ -28,6 +29,9 @@ export function useAuth(onSchemaDetected: (schema: string) => void) {
           signal,
         });
         if (!res.ok) {
+          if (res.status !== 401) {
+            setError('Schema Error: Failed to load semantic layer. Please ensure you have BigQuery permissions.');
+          }
           logger.warn('Schema detection returned non-OK status', { status: res.status });
           return;
         }
@@ -173,6 +177,7 @@ export function useAuth(onSchemaDetected: (schema: string) => void) {
       }, 1500);
 
     } catch (err) {
+      setError('Could not initiate Google Login. Please check your internet connection.');
       logger.logAuthError(err);
     }
   }, [checkAuthStatus, detectSchema]);
@@ -203,10 +208,14 @@ export function useAuth(onSchemaDetected: (schema: string) => void) {
     }
   }, [onSchemaDetected]);
 
+  const [error, setError] = useState<string | null>(null);
+
   return {
     isAuthenticated,
     isCheckingAuth,
     setIsAuthenticated,
+    error,
+    setError,
     handleLogin,
     handleLogout,
   };
