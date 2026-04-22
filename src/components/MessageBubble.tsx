@@ -110,11 +110,10 @@ export function MessageBubble({ message, onApproveSQL, onCancelReview }: Message
       >
         {/* Main bubble */}
         <div
-          className={`message-bubble shadow-lg transition-all ${
-            isUser
+          className={`message-bubble shadow-lg transition-all ${isUser
               ? 'bg-blue-600 text-white rounded-2xl rounded-tr-sm shadow-blue-100'
               : 'bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-800 rounded-2xl rounded-tl-sm'
-          }`}
+            }`}
         >
           <div className="px-5 py-3.5">
             {message.loading ? (
@@ -203,6 +202,21 @@ export function MessageBubble({ message, onApproveSQL, onCancelReview }: Message
                 disabled={!message.data.length}
               >
                 <Download className="h-4 w-4" aria-hidden="true" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-full"
+                onClick={() => {
+                  const url = `https://lookerstudio.google.com/reporting/create?c.reportName=InsightStream+Report&ds.datasourceName=InsightStream&ds.connector=bigQuery`;
+                  window.open(url, '_blank');
+                }}
+                aria-label="Explore in Looker Studio"
+                title="Explore in Looker Studio"
+              >
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z" />
+                </svg>
               </Button>
             </div>
             <AnalyticsChart data={message.data} config={message.chartConfig} />
