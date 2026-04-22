@@ -321,7 +321,7 @@ export function createApp(options: AppOptions = {}): Express {
     cookieSession({
       name: 'insight_stream_session',
       keys: [SESSION_SECRET || 'dev-secret-key-CHANGE-IN-PRODUCTION'],
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      // Removing maxAge makes it a session-only cookie
       secure: IS_PROD && !isLocal,
       sameSite: isLocal ? 'lax' : 'none',
       httpOnly: true,
